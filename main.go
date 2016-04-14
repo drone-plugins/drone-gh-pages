@@ -2,15 +2,11 @@ package main
 
 import (
     "bytes"
-
     "fmt"
-
     "path/filepath"
-
     "os"
     "os/exec"
     "os/user"
-
     "io/ioutil"
 
     "github.com/drone/drone-plugin-go/plugin"
@@ -28,9 +24,9 @@ password %s
 
 type Params struct {
     UpstreamName    string            `json:"upstream"`
-    PagesDirectory  string            `json:"pagesDirectory"`
-    TemporaryBase   string            `json:"temporaryBaseDirectory"`
-    TargetBranch    string            `json:"target"`
+    PagesDirectory  string            `json:"source"`
+    TemporaryBase   string            `json:"temp"`
+    TargetBranch    string            `json:"branch"`
 }
 
 func main() {
@@ -102,14 +98,9 @@ func publishDocs(r *plugin.Repo, b *plugin.Build, w *plugin.Workspace, v *Params
     if err != nil {
         return err
     }
+    defer os.RemoveAll(temporaryPagesDirectory)
 
     err = runPublishSteps(w.Path, temporaryBaseDirectory, temporaryPagesDirectory, fullPagesDirectory, v.TargetBranch, v.UpstreamName, r.Clone)
-    if err != nil {
-        os.RemoveAll(temporaryPagesDirectory)
-        return err
-    }
-
-    err = os.RemoveAll(temporaryPagesDirectory)
     if err != nil {
         return err
     }
