@@ -27,7 +27,7 @@ publish:
       branch: develop
 
 plugin:
-  name: Gh-Pages
+  name: GitHub Pages
   desc: Copies a directory to a repos gh-pages
   type: publish
   image: plugins/drone-gh-pages
