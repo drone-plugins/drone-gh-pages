@@ -10,6 +10,8 @@ import (
     "io/ioutil"
 
     "github.com/drone/drone-plugin-go/plugin"
+    "github.com/drone/drone-go/drone"
+    "github.com/drone-plugins/drone-git-push/repo"
 )
 
 var (
@@ -33,9 +35,9 @@ func main() {
     fmt.Printf("Drone gh-pages deployment plugin built from %s\n", buildCommit)
 
     v := new(Params)
-    r := new(plugin.Repo)
-    b := new(plugin.Build)
-    w := new(plugin.Workspace)
+    r := new(drone.Repo)
+    b := new(drone.Build)
+    w := new(drone.Workspace)
     plugin.Param("repo", r)
     plugin.Param("build", b)
     plugin.Param("workspace", w)
@@ -48,7 +50,7 @@ func main() {
     }
 }
 
-func publishDocs(r *plugin.Repo, b *plugin.Build, w *plugin.Workspace, v *Params) error {
+func publishDocs(r *drone.Repo, b *drone.Build, w *drone.Workspace, v *Params) error {
     if (v.UpstreamName == "") {
         v.UpstreamName = "origin"
     }
@@ -79,17 +81,17 @@ func publishDocs(r *plugin.Repo, b *plugin.Build, w *plugin.Workspace, v *Params
     }
 
     // write the rsa private key if provided
-    if err := writeKey(w); err != nil {
+    if err := repo.WriteKey(w); err != nil {
         fmt.Fprintln(os.Stderr, err)
         return err
     }
 
-    err := GlobalUser(b)
+    err := repo.GlobalUser(b).Run()
     if err != nil {
         return err
     }
 
-    err = GlobalName(b)
+    err = repo.GlobalName(b).Run()
     if err != nil {
         return err
     }
@@ -254,18 +256,13 @@ func commitTemporaryFilesToClone(temporaryPagesDirectory string, message string)
 
 // Push our clone to the upstream
 func pushTemporaryClone(temporaryPagesDirectory string, upstreamName string, targetBranch string) *exec.Cmd {
-    cmd := exec.Command(
-        "git",
-        "push",
-        upstreamName,
-        targetBranch,
-    )
+    cmd := repo.RemotePush(upstreamName, targetBranch, false)
     cmd.Dir = temporaryPagesDirectory
     return cmd
 }
 
 // Writes the netrc file.
-func writeNetrc(in *plugin.Workspace) error {
+func writeNetrc(in *drone.Workspace) error {
     if in.Netrc == nil || len(in.Netrc.Machine) == 0 {
         return nil
     }
@@ -282,44 +279,4 @@ func writeNetrc(in *plugin.Workspace) error {
     }
     path := filepath.Join(home, ".netrc")
     return ioutil.WriteFile(path, []byte(out), 0600)
-}
-
-// Writes the RSA private key
-func writeKey(in *plugin.Workspace) error {
-    if in.Keys == nil || len(in.Keys.Private) == 0 {
-        return nil
-    }
-    home := "/root"
-    u, err := user.Current()
-    if err == nil {
-        home = u.HomeDir
-    }
-    sshpath := filepath.Join(home, ".ssh")
-    if err := os.MkdirAll(sshpath, 0700); err != nil {
-        return err
-    }
-    confpath := filepath.Join(sshpath, "config")
-    privpath := filepath.Join(sshpath, "id_rsa")
-    ioutil.WriteFile(confpath, []byte("StrictHostKeyChecking no\n"), 0700)
-    return ioutil.WriteFile(privpath, []byte(in.Keys.Private), 0600)
-}
-
-func GlobalUser(build *plugin.Build) error {
-    cmd := exec.Command(
-        "git",
-        "config",
-        "--global",
-        "user.email",
-        build.Email)
-    return cmd.Run()
-}
-
-func GlobalName(build *plugin.Build) error {
-    cmd := exec.Command(
-        "git",
-        "config",
-        "--global",
-        "user.name",
-        build.Author)
-    return cmd.Run()
 }
