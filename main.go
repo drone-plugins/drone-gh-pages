@@ -84,12 +84,12 @@ func publishDocs(r *plugin.Repo, b *plugin.Build, w *plugin.Workspace, v *Params
         return err
     }
 
-    err := runCommand(GlobalUser(b), nil)
+    err := GlobalUser(b)
     if err != nil {
         return err
     }
 
-    err = runCommand(GlobalName(b), nil)
+    err = GlobalName(b)
     if err != nil {
         return err
     }
@@ -304,22 +304,22 @@ func writeKey(in *plugin.Workspace) error {
     return ioutil.WriteFile(privpath, []byte(in.Keys.Private), 0600)
 }
 
-func GlobalUser(build *plugin.Build) *exec.Cmd {
+func GlobalUser(build *plugin.Build) error {
     cmd := exec.Command(
         "git",
         "config",
         "--global",
         "user.email",
         build.Email)
-    return cmd
+    return cmd.Run()
 }
 
-func GlobalName(build *plugin.Build) *exec.Cmd {
+func GlobalName(build *plugin.Build) error {
     cmd := exec.Command(
         "git",
         "config",
         "--global",
         "user.name",
         build.Author)
-    return cmd
+    return cmd.Run()
 }
