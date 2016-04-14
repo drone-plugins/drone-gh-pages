@@ -1,5 +1,5 @@
 # drone-gh-pages
-Drone plugin for publishing to GitHub Pages
+Drone plugin for publishing to GitHub Pages. For the usage information and a listing of the available options please take a look at [the docs](DOCS.md).
 
 ## Binary
 
