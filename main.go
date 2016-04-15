@@ -25,7 +25,7 @@ password %s
 `
 
 func main() {
-	fmt.Printf("Drone gh-pages deployment plugin built from %s\n", buildCommit)
+	fmt.Printf("Drone GitHub Pages plugin built from %s\n", buildCommit)
 
 	v := new(Params)
 	r := new(drone.Repo)
