@@ -24,13 +24,6 @@ login %s
 password %s
 `
 
-type Params struct {
-    UpstreamName    string            `json:"upstream"`
-    PagesDirectory  string            `json:"source"`
-    TemporaryBase   string            `json:"temp"`
-    TargetBranch    string            `json:"branch"`
-}
-
 func main() {
     fmt.Printf("Drone gh-pages deployment plugin built from %s\n", buildCommit)
 
