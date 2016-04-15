@@ -1,0 +1,33 @@
+build:
+  image: golang:1.6
+  environment:
+    - CGO_ENABLED=0
+  commands:
+    - make deps
+    - make vet
+    - make build
+    - make test
+
+publish:
+  docker:
+    username: $$DOCKER_USER
+    password: $$DOCKER_PASS
+    email: $$DOCKER_EMAIL
+    repo: plugins/drone-gh-pages
+    tag: latest
+    when:
+      branch: master
+  docker:
+    username: $$DOCKER_USER
+    password: $$DOCKER_PASS
+    email: $$DOCKER_EMAIL
+    repo: plugins/drone-gh-pages
+    tag: develop
+    when:
+      branch: develop
+
+plugin:
+  name: GitHub Pages
+  desc: Copies a directory to a repos gh-pages
+  type: publish
+  image: plugins/drone-gh-pages
