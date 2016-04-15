@@ -47,7 +47,7 @@ make deps build
     },
     "vargs": {
         "source": "pages",
-        "upstream": "origin"
+        "remote": "origin"
     }
 }
 EOF
