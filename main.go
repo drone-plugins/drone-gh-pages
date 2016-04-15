@@ -9,9 +9,9 @@ import (
 	"os/user"
 	"path/filepath"
 
-	"github.com/drone-plugins/drone-git-push/repo"
 	"github.com/drone/drone-go/drone"
-	"github.com/drone/drone-plugin-go/plugin"
+	"github.com/drone/drone-go/plugin"
+	"github.com/drone-plugins/drone-git-push/repo"
 )
 
 var (
@@ -27,18 +27,21 @@ password %s
 func main() {
 	fmt.Printf("Drone GitHub Pages plugin built from %s\n", buildCommit)
 
-	v := new(Params)
-	r := new(drone.Repo)
-	b := new(drone.Build)
-	w := new(drone.Workspace)
-	plugin.Param("repo", r)
-	plugin.Param("build", b)
-	plugin.Param("workspace", w)
-	plugin.Param("vargs", &v)
+	workspace := drone.Workspace{}
+	repo := drone.Repo{}
+	build := drone.Build{}
+	vargs := Params{}
+
+	plugin.Param("workspace", &workspace)
+	plugin.Param("repo", &repo)
+	plugin.Param("build", &build)
+	plugin.Param("vargs", &vargs)
 	plugin.MustParse()
-	err := publishDocs(r, b, w, v)
+
+	err := publishDocs(&repo, &build, &workspace, &vargs)
+
 	if err != nil {
-		fmt.Printf("%s\n", err)
+		fmt.Println(err)
 		os.Exit(1)
 	}
 }
@@ -47,24 +50,28 @@ func publishDocs(r *drone.Repo, b *drone.Build, w *drone.Workspace, v *Params) e
 	if v.UpstreamName == "" {
 		v.UpstreamName = "origin"
 	}
+
 	if v.TargetBranch == "" {
 		v.TargetBranch = "gh-pages"
 	}
+
 	if v.TemporaryBase == "" {
 		v.TemporaryBase = ".tmp"
 	}
+
 	if v.PagesDirectory == "" {
 		v.PagesDirectory = "docs"
 	}
 
 	temporaryBaseDirectory := ""
+
 	if filepath.IsAbs(v.TemporaryBase) {
 		temporaryBaseDirectory = v.TemporaryBase
 	} else {
 		temporaryBaseDirectory = filepath.Join(w.Path, v.TemporaryBase)
 	}
-	temporaryPagesDirectory := filepath.Join(temporaryBaseDirectory, v.PagesDirectory)
 
+	temporaryPagesDirectory := filepath.Join(temporaryBaseDirectory, v.PagesDirectory)
 	fullPagesDirectory := filepath.Join(w.Path, v.PagesDirectory)
 
 	// generate the .netrc file
@@ -79,26 +86,34 @@ func publishDocs(r *drone.Repo, b *drone.Build, w *drone.Workspace, v *Params) e
 		return err
 	}
 
-	err := repo.GlobalUser(b).Run()
-	if err != nil {
+	if err := repo.GlobalUser(b).Run(); err != nil {
 		return err
 	}
 
-	err = repo.GlobalName(b).Run()
-	if err != nil {
+	if err := repo.GlobalName(b).Run(); err != nil {
 		return err
 	}
 
-	err = os.MkdirAll(temporaryPagesDirectory, 0777)
-	if err != nil {
+	if err := os.MkdirAll(temporaryPagesDirectory, 0777); err != nil {
 		return err
 	}
+
 	defer os.RemoveAll(temporaryPagesDirectory)
 
-	err = runPublishSteps(w.Path, temporaryBaseDirectory, temporaryPagesDirectory, fullPagesDirectory, v.TargetBranch, v.UpstreamName, r.Clone)
+	err := runPublishSteps(
+		w.Path,
+		temporaryBaseDirectory,
+		temporaryPagesDirectory,
+		fullPagesDirectory,
+		v.TargetBranch,
+		v.UpstreamName,
+		r.Clone,
+	)
+
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -110,13 +125,14 @@ func runCommand(cmd *exec.Cmd, out *bytes.Buffer) error {
 	} else {
 		cmd.Stdout = out
 	}
+
 	cmd.Stderr = os.Stderr
 
-	err := cmd.Run()
-	if err != nil {
+	if err := cmd.Run(); err != nil {
 		fmt.Printf("Error: %+v %s\n", cmd, err)
 		return err
 	}
+
 	return nil
 }
 
@@ -131,9 +147,11 @@ func runPublishSteps(
 
 	// Get the commit message
 	msgRaw, err := commitMessage(workspacePath).Output()
+
 	if err != nil {
 		return err
 	}
+
 	msg := fmt.Sprintf("%s", msgRaw)
 	fmt.Printf("%s\n", msg)
 
