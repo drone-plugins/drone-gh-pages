@@ -9,6 +9,9 @@ build:
     - make test
 
 publish:
+  coverage:
+    when:
+      branch: master
   docker:
     username: $$DOCKER_USER
     password: $$DOCKER_PASS
@@ -28,6 +31,9 @@ publish:
 
 plugin:
   name: GitHub Pages
-  desc: Copies a directory to a repos gh-pages
+  desc: Copies a directory to GitHub Pages
   type: publish
   image: plugins/drone-gh-pages
+  labels:
+    - github
+    - pages

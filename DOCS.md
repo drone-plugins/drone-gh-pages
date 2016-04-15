@@ -10,7 +10,7 @@ The following is a sample configuration in your .drone.yml file:
 
 ```yaml
 publish:
-  gh-pages:
+  gh_pages:
     source: pages
     upstream: origin
 ```
