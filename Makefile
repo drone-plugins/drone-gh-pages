@@ -4,7 +4,7 @@ EXECUTABLE ?= drone-gh-pages
 IMAGE ?= plugins/$(EXECUTABLE)
 COMMIT ?= $(shell git rev-parse --short HEAD)
 
-LDFLAGS = -X "main.buildCommit=$(COMMIT)"
+LDFLAGS = -X "main.build=$(DRONE_BUILD_NUMBER)"
 PACKAGES = $(shell go list ./... | grep -v /vendor/)
 
 all: deps build test

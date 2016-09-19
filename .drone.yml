@@ -10,17 +10,17 @@ pipeline:
       - make test
   docker:
     storage_driver: overlay
-    repo: plugins/drone-gh-pages
+    repo: plugins/gh-pages
     tag: [ "latest" ]
     when:
-      branch: release/0.4
+      branch: master
       event: push
 
 plugin:
   name: GitHub Pages
   desc: Copies a directory to GitHub Pages
   type: publish
-  image: plugins/drone-gh-pages
+  image: plugins/gh-pages
   labels:
     - github
     - pages
