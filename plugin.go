@@ -83,13 +83,11 @@ func (p Plugin) Exec() error {
 
 	// generate the .netrc file
 	if err := repo.WriteNetrc(netrcMachine, netrcLogin, netrcPassword); err != nil {
-		fmt.Fprintln(os.Stderr, err)
 		return err
 	}
 
 	// write the rsa private key if provided
 	if err := repo.WriteKey(sshKey); err != nil {
-		fmt.Fprintln(os.Stderr, err)
 		return err
 	}
 
@@ -107,7 +105,7 @@ func (p Plugin) Exec() error {
 
 	defer os.RemoveAll(temporaryPagesDirectory)
 
-	err := runPublishSteps(
+	return runPublishSteps(
 		buildPath,
 		temporaryBaseDirectory,
 		temporaryPagesDirectory,
@@ -116,12 +114,6 @@ func (p Plugin) Exec() error {
 		upstreamName,
 		cloneUrl,
 	)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func runCommand(cmd *exec.Cmd, out *bytes.Buffer) error {
@@ -159,23 +151,22 @@ func runPublishSteps(
 		return err
 	}
 
-	msg := fmt.Sprintf("%s", msgRaw)
-	fmt.Printf("%s\n", msg)
+	msg := string(msgRaw)
 
 	// Set up git config (rsa, etc)
-	fmt.Printf("about to clone\n")
+	fmt.Println("about to clone")
 	err = runCommand(cloneTarget(workspacePath, vargsTargetBranch, cloneUrl, temporaryPagesDirectory), nil)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("about to rsync\n")
+	fmt.Println("about to rsync")
 	err = runCommand(rsyncPages(workspacePath, fullPagesDirectory, temporaryBaseDirectory), nil)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("about to add to clone\n")
+	fmt.Println("about to add to clone")
 	var addResult bytes.Buffer
 	err = runCommand(addTemporaryFilesToClone(temporaryPagesDirectory), &addResult)
 	if err != nil {
@@ -186,13 +177,13 @@ func runPublishSteps(
 	// For now, if the add resulted in a success, with output, we are assuming that there are
 	// changes to commit and push
 	if addResult.Len() > 0 {
-		fmt.Printf("about to commit\n")
+		fmt.Println("about to commit")
 		err = runCommand(commitTemporaryFilesToClone(temporaryPagesDirectory, msg), nil)
 		if err != nil {
 			return err
 		}
 
-		fmt.Printf("about to push\n")
+		fmt.Println("about to push")
 		err = runCommand(pushTemporaryClone(temporaryPagesDirectory, vargsUpstreamName, vargsTargetBranch), nil)
 		if err != nil {
 			return err
