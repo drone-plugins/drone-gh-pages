@@ -12,13 +12,46 @@ import (
 	"github.com/drone-plugins/drone-git-push/repo"
 )
 
-type Plugin struct {
-	Repo   Repo
-	Build  Build
-	Commit Commit
-	Netrc  Netrc
-	Config Config
-}
+type (
+	Repo struct {
+		Clone string
+	}
+
+	Build struct {
+		Path string
+	}
+
+	Author struct {
+		Name  string
+		Email string
+	}
+
+	Commit struct {
+		Author Author
+	}
+
+	Netrc struct {
+		Machine  string
+		Login    string
+		Password string
+	}
+
+	Config struct {
+		Key            string
+		UpstreamName   string
+		TargetBranch   string
+		TemporaryBase  string
+		PagesDirectory string
+	}
+
+	Plugin struct {
+		Repo   Repo
+		Build  Build
+		Commit Commit
+		Netrc  Netrc
+		Config Config
+	}
+)
 
 func (p Plugin) Exec() error {
 	cloneUrl := p.Repo.Clone
