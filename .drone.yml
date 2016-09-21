@@ -3,7 +3,7 @@ workspace:
   path: src/github.com/drone-plugins/drone-gh-pages
 
 pipeline:
-  test:
+  build:
     image: golang:1.6
     environment:
       - CGO_ENABLED=0
@@ -12,7 +12,8 @@ pipeline:
       - go test -cover -coverprofile=coverage.out
       - go build -ldflags "-s -w -X main.build=$DRONE_BUILD_NUMBER" -a -tags netgo
 
-  docker:
+  publish:
+    image: plugins/docker
     repo: plugins/gh-pages
     tags: [ "latest", "1.0", "1" ]
     when:
