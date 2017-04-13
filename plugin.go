@@ -229,6 +229,8 @@ func rsyncPages(workspacePath string, pagesDirectory string, temporaryBaseDirect
 		"--delete",
 		"--exclude",
 		".git",
+		"--exclude",
+		"CNAME",
 		"-r",
 		pagesDirectory,
 		temporaryBaseDirectory,
