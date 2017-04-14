@@ -15,16 +15,8 @@ pipeline:
   publish:
     image: plugins/docker
     repo: plugins/gh-pages
-    tags: [ "latest", "1.0", "1" ]
+    tags: [ "latest", "1.1", "1" ]
+    secrets: [ docker_username, docker_password ]
     when:
       branch: master
       event: push
-
-plugin:
-  name: GitHub Pages
-  desc: Copies a directory to GitHub Pages
-  type: publish
-  image: plugins/gh-pages
-  labels:
-    - github
-    - pages

@@ -80,7 +80,7 @@ func main() {
 		cli.StringFlag{
 			Name:   "ssh-key",
 			Usage:  "private ssh key",
-			EnvVar: "PLUGIN_SSH_KEY,GIT_PUSH_SSH_KEY",
+			EnvVar: "PLUGIN_SSH_KEY,GIT_PUSH_SSH_KEY,SSH_KEY",
 		},
 		cli.StringFlag{
 			Name:  "env-file",
