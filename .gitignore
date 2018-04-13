@@ -23,5 +23,8 @@ _testmain.go
 *.test
 *.prof
 
+release/
+vendor/
+
 coverage.out
 drone-gh-pages
