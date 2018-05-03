@@ -2,22 +2,16 @@
 
 
 [[projects]]
-  name = "github.com/Sirupsen/logrus"
-  packages = ["."]
-  revision = "c155da19408a8799da419ed3eeb0cb5db0ad5dbc"
-  version = "v1.0.5"
-
-[[projects]]
-  name = "github.com/drone-plugins/drone-git-push"
+  name = "github.com/appleboy/drone-git-push"
   packages = ["repo"]
   revision = "c115616703f10f373f6e4f60e561e0ef737a1a88"
   version = "0.1.0"
 
 [[projects]]
-  name = "github.com/joho/godotenv"
+  name = "github.com/pkg/errors"
   packages = ["."]
-  revision = "a79fa1e548e2c689c241d10173efd51e5d689d5b"
-  version = "v1.2.0"
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
 
 [[projects]]
   name = "github.com/urfave/cli"
@@ -25,24 +19,9 @@
   revision = "cfb38830724cc34fedffe9a2a29fb54fa9169cd1"
   version = "v1.20.0"
 
-[[projects]]
-  branch = "master"
-  name = "golang.org/x/crypto"
-  packages = ["ssh/terminal"]
-  revision = "21652f85b0fdddb6c2b6b77a5beca5c5a908174a"
-
-[[projects]]
-  branch = "master"
-  name = "golang.org/x/sys"
-  packages = [
-    "unix",
-    "windows"
-  ]
-  revision = "cc7307a45468e49eaf2997c890f14aa03a26917b"
-
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b2e51f1bbcdf515472ec67409251c47780a38cf5553388d62b4254297dc1585d"
+  inputs-digest = "e3da21ceb144c06440e8fead9539f7e8a1ff2b37ff6c43864cadf8378959e3a4"
   solver-name = "gps-cdcl"
   solver-version = 1

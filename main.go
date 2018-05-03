@@ -2,22 +2,54 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
+	"path/filepath"
 
-	"github.com/Sirupsen/logrus"
-	"github.com/joho/godotenv"
 	"github.com/urfave/cli"
 )
 
-var build = "0"
+var (
+	version = "0.0.0"
+	build   = "0"
+)
 
 func main() {
 	app := cli.NewApp()
 	app.Name = "gh-pages plugin"
 	app.Usage = "gh-pages plugin"
+	app.Version = fmt.Sprintf("%s+%s", version, build)
 	app.Action = run
-	app.Version = fmt.Sprintf("1.0.%s", build)
 	app.Flags = []cli.Flag{
+		cli.StringFlag{
+			Name:   "upstream-name",
+			Usage:  "git upstream to target",
+			EnvVar: "PLUGIN_UPSTREAM_NAME",
+			Value:  "origin",
+		},
+		cli.StringFlag{
+			Name:   "target-branch",
+			Usage:  "git branch to target",
+			EnvVar: "PLUGIN_TARGET_BRANCH",
+			Value:  "gh-pages",
+		},
+		cli.StringFlag{
+			Name:   "temporary-base",
+			Usage:  "temporary directory for pages pull",
+			EnvVar: "PLUGIN_TEMPORARY_BASE",
+			Value:  ".tmp",
+		},
+		cli.StringFlag{
+			Name:   "pages-directory",
+			Usage:  "directory of content to publish",
+			EnvVar: "PLUGIN_PAGES_DIRECTORY",
+			Value:  "docs",
+		},
+		cli.StringFlag{
+			Name:   "ssh-key",
+			Usage:  "private ssh key",
+			EnvVar: "PLUGIN_SSH_KEY,GIT_PUSH_SSH_KEY,SSH_KEY",
+		},
 		cli.StringFlag{
 			Name:   "commit.author.name",
 			Usage:  "git author name",
@@ -53,52 +85,14 @@ func main() {
 			Usage:  "netrc password",
 			EnvVar: "DRONE_NETRC_PASSWORD",
 		},
-		cli.StringFlag{
-			Name:   "upstream-name",
-			Usage:  "git upstream to target",
-			EnvVar: "PLUGIN_UPSTREAM_NAME",
-			Value:  "origin",
-		},
-		cli.StringFlag{
-			Name:   "target-branch",
-			Usage:  "git branch to target",
-			EnvVar: "PLUGIN_TARGET_BRANCH",
-			Value:  "gh-pages",
-		},
-		cli.StringFlag{
-			Name:   "temporary-base",
-			Usage:  "temporary directory for pages pull",
-			EnvVar: "PLUGIN_TEMPORARY_BASE",
-			Value:  ".tmp",
-		},
-		cli.StringFlag{
-			Name:   "pages-directory",
-			Usage:  "directory of content to publish",
-			EnvVar: "PLUGIN_PAGES_DIRECTORY",
-			Value:  "docs",
-		},
-		cli.StringFlag{
-			Name:   "ssh-key",
-			Usage:  "private ssh key",
-			EnvVar: "PLUGIN_SSH_KEY,GIT_PUSH_SSH_KEY,SSH_KEY",
-		},
-		cli.StringFlag{
-			Name:  "env-file",
-			Usage: "source env file",
-		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
-		logrus.Fatal(err)
+		log.Fatal(err)
 	}
-
 }
 
 func run(c *cli.Context) error {
-	if c.String("env-file") != "" {
-		_ = godotenv.Load(c.String("env-file"))
-	}
-
 	plugin := Plugin{
 		Repo: Repo{
 			Clone: c.String("remote"),
@@ -128,6 +122,25 @@ func run(c *cli.Context) error {
 			PagesDirectory: c.String("pages-directory"),
 		},
 	}
+
+	if !filepath.IsAbs(plugin.Config.TemporaryBase) {
+		plugin.Config.TemporaryBase = filepath.Join(
+			plugin.Build.Path,
+			plugin.Config.TemporaryBase,
+		)
+	}
+
+	if !filepath.IsAbs(plugin.Config.PagesDirectory) {
+		plugin.Config.PagesDirectory = filepath.Join(
+			plugin.Build.Path,
+			plugin.Config.PagesDirectory,
+		)
+	}
+
+	plugin.Config.WorkDirectory = filepath.Join(
+		plugin.Config.TemporaryBase,
+		filepath.Base(plugin.Config.PagesDirectory),
+	)
 
 	return plugin.Exec()
 }
