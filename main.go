@@ -74,16 +74,17 @@ func main() {
 			Name:   "netrc.machine",
 			Usage:  "netrc machine",
 			EnvVar: "DRONE_NETRC_MACHINE",
+			Value: "github.com",
 		},
 		cli.StringFlag{
 			Name:   "netrc.username",
 			Usage:  "netrc username",
-			EnvVar: "DRONE_NETRC_USERNAME",
+			EnvVar: "PLUGIN_USERNAME,DRONE_NETRC_USERNAME,GH_PAGES_USERNAME,GITHUB_USERNAME",
 		},
 		cli.StringFlag{
 			Name:   "netrc.password",
 			Usage:  "netrc password",
-			EnvVar: "DRONE_NETRC_PASSWORD",
+			EnvVar: "PLUGIN_PASSWORD,DRONE_NETRC_PASSWORD,GH_PAGES_PASSWORD,GITHUB_PASSWORD",
 		},
 	}
 
