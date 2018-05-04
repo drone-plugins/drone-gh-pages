@@ -66,12 +66,16 @@ func (p Plugin) Exec() error {
 }
 
 func (p Plugin) prepare() error {
-	if err := repo.WriteNetrc(p.Netrc.Machine, p.Netrc.Login, p.Netrc.Password); err != nil {
-		return errors.Wrap(err, "failed to write netrc")
+	if p.Netrc.Login != "" {
+		if err := repo.WriteNetrc(p.Netrc.Machine, p.Netrc.Login, p.Netrc.Password); err != nil {
+			return errors.Wrap(err, "failed to write netrc")
+		}
 	}
 
-	if err := repo.WriteKey(p.Config.Key); err != nil {
-		return errors.Wrap(err, "failed to write sshkey")
+	if p.Config.Key != "" {
+		if err := repo.WriteKey(p.Config.Key); err != nil {
+			return errors.Wrap(err, "failed to write sshkey")
+		}
 	}
 
 	if err := repo.GlobalUser(p.Commit.Author.Email).Run(); err != nil {
