@@ -183,6 +183,7 @@ func (p Plugin) pushChanges() error {
 		p.Config.UpstreamName,
 		p.Config.TargetBranch,
 		false,
+		false,
 	)
 
 	cmd.Dir = p.Config.WorkDirectory
