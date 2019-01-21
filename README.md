@@ -7,7 +7,6 @@
 [![](https://images.microbadger.com/badges/image/plugins/gh-pages.svg)](https://microbadger.com/images/plugins/gh-pages "Get your own image badge on microbadger.com")
 [![Go Doc](https://godoc.org/github.com/drone-plugins/drone-gh-pages?status.svg)](http://godoc.org/github.com/drone-plugins/drone-gh-pages)
 [![Go Report](https://goreportcard.com/badge/github.com/drone-plugins/drone-gh-pages)](https://goreportcard.com/report/github.com/drone-plugins/drone-gh-pages)
-[![](https://images.microbadger.com/badges/image/plugins/gh-pages.svg)](https://microbadger.com/images/plugins/gh-pages "Get your own image badge on microbadger.com")
 
 Drone plugin for publishing static website to GitHub Pages. For the usage information and a listing of the available options please take a look at [the docs](http://plugins.drone.io/drone-plugins/drone-gh-pages/).
 
