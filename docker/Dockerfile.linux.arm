@@ -1,4 +1,4 @@
-FROM plugins/base:arm64
+FROM plugins/base:linux-arm
 
 LABEL maintainer="Drone.IO Community <drone-dev@googlegroups.com>" \
   org.label-schema.name="Drone GitHub Pages" \
@@ -7,5 +7,5 @@ LABEL maintainer="Drone.IO Community <drone-dev@googlegroups.com>" \
 
 RUN apk add --no-cache git openssh curl rsync perl
 
-ADD release/linux/arm64/drone-gh-pages /bin/
+ADD release/linux/arm/drone-gh-pages /bin/
 ENTRYPOINT ["/bin/drone-gh-pages"]
