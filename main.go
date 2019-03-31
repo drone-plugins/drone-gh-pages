@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -10,16 +9,15 @@ import (
 )
 
 var (
-	version = "0.0.0"
-	build   = "0"
+	version = "unknown"
 )
 
 func main() {
 	app := cli.NewApp()
 	app.Name = "gh-pages plugin"
 	app.Usage = "gh-pages plugin"
-	app.Version = fmt.Sprintf("%s+%s", version, build)
 	app.Action = run
+	app.Version = version
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:   "upstream-name",
@@ -74,7 +72,7 @@ func main() {
 			Name:   "netrc.machine",
 			Usage:  "netrc machine",
 			EnvVar: "DRONE_NETRC_MACHINE",
-			Value: "github.com",
+			Value:  "github.com",
 		},
 		cli.StringFlag{
 			Name:   "netrc.username",
