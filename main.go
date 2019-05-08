@@ -61,17 +61,17 @@ func main() {
 		cli.StringFlag{
 			Name:   "remote",
 			Usage:  "git remote url",
-			EnvVar: "DRONE_REMOTE_URL",
+			EnvVar: "PLUGIN_REMOTE_URL,DRONE_REMOTE_URL",
 		},
 		cli.StringFlag{
 			Name:   "path",
 			Usage:  "git clone path",
-			EnvVar: "DRONE_WORKSPACE",
+			EnvVar: "PLUGIN_WORKSPACE,DRONE_WORKSPACE",
 		},
 		cli.StringFlag{
 			Name:   "netrc.machine",
 			Usage:  "netrc machine",
-			EnvVar: "DRONE_NETRC_MACHINE",
+			EnvVar: "PLUGIN_NETRC_MACHINE,DRONE_NETRC_MACHINE",
 			Value:  "github.com",
 		},
 		cli.StringFlag{
