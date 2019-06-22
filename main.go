@@ -61,7 +61,7 @@ func main() {
 		cli.StringFlag{
 			Name:   "remote",
 			Usage:  "git remote url",
-			EnvVar: "DRONE_REMOTE_URL",
+			EnvVar: "PLUGIN_REMOTE_URL,DRONE_REMOTE_URL",
 		},
 		cli.StringFlag{
 			Name:   "path",
