@@ -71,7 +71,7 @@ func main() {
 		cli.StringFlag{
 			Name:   "netrc.machine",
 			Usage:  "netrc machine",
-			EnvVar: "DRONE_NETRC_MACHINE",
+			EnvVar: "PLUGIN_MACHINE,DRONE_NETRC_MACHINE",
 			Value:  "github.com",
 		},
 		cli.StringFlag{
