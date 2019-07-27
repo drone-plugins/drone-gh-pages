@@ -36,11 +36,14 @@ docker build \
 
 ## Usage
 
+`PLUGIN_NETRC_MACHINE` is optional, default value is "github.com".
+
 ```console
 docker run --rm \
   -e PLUGIN_USERNAME="octocat" \
   -e PLUGIN_PASSWORD="p455w0rd" \
   -e PLUGIN_PAGES_DIRECTORY="docs" \
+  -e PLUGIN_NETRC_MACHINE="github.com" \
   -e DRONE_COMMIT_AUTHOR="Drone" \
   -e DRONE_COMMIT_AUTHOR_EMAIL="drone@example.com" \
   -e DRONE_REMOTE_URL="https://github.com/drone-plugins/drone-docker.git" \
