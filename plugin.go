@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path"
 	"strings"
 
 	"github.com/appleboy/drone-git-push/repo"
@@ -36,12 +37,13 @@ type (
 	}
 
 	Config struct {
-		Key            string
-		UpstreamName   string
-		TargetBranch   string
-		TemporaryBase  string
-		PagesDirectory string
-		WorkDirectory  string
+		Key             string
+		UpstreamName    string
+		TargetBranch    string
+		TemporaryBase   string
+		PagesDirectory  string
+		WorkDirectory   string
+		TargetDirectory string
 	}
 
 	Plugin struct {
@@ -135,14 +137,15 @@ func (p Plugin) cloneTarget() error {
 func (p Plugin) rsyncPages() error {
 	cmd := exec.Command(
 		"rsync",
+		"-av",
 		"--delete",
 		"--exclude",
 		".git",
 		"--exclude",
 		"CNAME",
 		"-r",
-		p.Config.PagesDirectory,
-		p.Config.TemporaryBase,
+		strings.TrimRight(p.Config.PagesDirectory, "/")+"/",
+		path.Join(p.Config.WorkDirectory, p.Config.TargetDirectory),
 	)
 
 	cmd.Dir = p.Build.Path
