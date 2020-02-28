@@ -44,6 +44,11 @@ func main() {
 			Value:  "docs",
 		},
 		cli.StringFlag{
+			Name:   "target-directory",
+			Usage:  "directory of content to sync",
+			EnvVar: "PLUGIN_TARGET_DIRECTORY",
+		},
+		cli.StringFlag{
 			Name:   "ssh-key",
 			Usage:  "private ssh key",
 			EnvVar: "PLUGIN_SSH_KEY,GIT_PUSH_SSH_KEY,SSH_KEY",
@@ -114,11 +119,12 @@ func run(c *cli.Context) error {
 			Password: c.String("netrc.password"),
 		},
 		Config: Config{
-			Key:            c.String("ssh-key"),
-			UpstreamName:   c.String("upstream-name"),
-			TargetBranch:   c.String("target-branch"),
-			TemporaryBase:  c.String("temporary-base"),
-			PagesDirectory: c.String("pages-directory"),
+			Key:             c.String("ssh-key"),
+			UpstreamName:    c.String("upstream-name"),
+			TargetBranch:    c.String("target-branch"),
+			TemporaryBase:   c.String("temporary-base"),
+			PagesDirectory:  c.String("pages-directory"),
+			TargetDirectory: c.String("target-directory"),
 		},
 	}
 
