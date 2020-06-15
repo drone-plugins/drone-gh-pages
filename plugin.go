@@ -42,6 +42,8 @@ type (
 		TemporaryBase  string
 		PagesDirectory string
 		WorkDirectory  string
+		ExcludeCname   bool
+		Delete         bool
 	}
 
 	Plugin struct {
@@ -133,16 +135,36 @@ func (p Plugin) cloneTarget() error {
 }
 
 func (p Plugin) rsyncPages() error {
-	cmd := exec.Command(
-		"rsync",
-		"--delete",
+	args := []string{
+		"-r",
 		"--exclude",
 		".git",
-		"--exclude",
-		"CNAME",
-		"-r",
+	}
+
+	if p.Config.ExcludeCname {
+		args = append(
+			args,
+			"--exclude",
+			"CNAME",
+		)
+	}
+
+	if p.Config.Delete {
+		args = append(
+			args,
+			"--delete",
+		)
+	}
+
+	args = append(
+		args,
 		p.Config.PagesDirectory,
 		p.Config.TemporaryBase,
+	)
+
+	cmd := exec.Command(
+		"rsync",
+		args...,
 	)
 
 	cmd.Dir = p.Build.Path

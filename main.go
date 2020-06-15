@@ -48,6 +48,16 @@ func main() {
 			Usage:  "private ssh key",
 			EnvVar: "PLUGIN_SSH_KEY,GIT_PUSH_SSH_KEY,SSH_KEY",
 		},
+		cli.BoolTFlag{
+			Name:   "exclude-cname",
+			Usage:  "exclude cname file from sync",
+			EnvVar: "PLUGIN_EXCLUDE_CNAME",
+		},
+		cli.BoolTFlag{
+			Name:   "delete",
+			Usage:  "delete files from destination",
+			EnvVar: "PLUGIN_DELETE",
+		},
 		cli.StringFlag{
 			Name:   "commit.author.name",
 			Usage:  "git author name",
@@ -119,6 +129,8 @@ func run(c *cli.Context) error {
 			TargetBranch:   c.String("target-branch"),
 			TemporaryBase:  c.String("temporary-base"),
 			PagesDirectory: c.String("pages-directory"),
+			ExcludeCname:   c.Bool("exclude-cname"),
+			Delete:         c.Bool("delete"),
 		},
 	}
 
