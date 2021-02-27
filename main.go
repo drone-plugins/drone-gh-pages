@@ -78,10 +78,10 @@ func main() {
 			Usage:  "git clone path",
 			EnvVar: "PLUGIN_WORKSPACE,DRONE_WORKSPACE",
 		},
-		cli.StringFlag{
+		cli.BoolTFlag{
 			Name:   "force-push",
 			Usage:  "git force push",
-			EnvVar: "PLUGIN_REMOTE_URL,DRONE_REMOTE_URL",
+			EnvVar: "PLUGIN_FORCE_PUSH",
 		},
 		cli.StringFlag{
 			Name:   "netrc.machine",
