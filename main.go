@@ -79,6 +79,11 @@ func main() {
 			EnvVar: "PLUGIN_WORKSPACE,DRONE_WORKSPACE",
 		},
 		cli.StringFlag{
+			Name:   "force-push",
+			Usage:  "git force push",
+			EnvVar: "PLUGIN_REMOTE_URL,DRONE_REMOTE_URL",
+		},
+		cli.StringFlag{
 			Name:   "netrc.machine",
 			Usage:  "netrc machine",
 			EnvVar: "PLUGIN_NETRC_MACHINE,DRONE_NETRC_MACHINE",
@@ -131,6 +136,7 @@ func run(c *cli.Context) error {
 			PagesDirectory: c.String("pages-directory"),
 			ExcludeCname:   c.Bool("exclude-cname"),
 			Delete:         c.Bool("delete"),
+			ForcePush:      c.Bool("force-push"),
 		},
 	}
 

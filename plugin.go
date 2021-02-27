@@ -44,6 +44,7 @@ type (
 		WorkDirectory  string
 		ExcludeCname   bool
 		Delete         bool
+		ForcePush      bool
 	}
 
 	Plugin struct {
@@ -204,7 +205,7 @@ func (p Plugin) pushChanges() error {
 	cmd := repo.RemotePush(
 		p.Config.UpstreamName,
 		p.Config.TargetBranch,
-		false,
+		p.Config.ForcePush,
 		false,
 	)
 
