@@ -114,26 +114,6 @@ steps:
       exclude:
       - pull_request
 
-- name: publish-force
-  pull: always
-  image: plugins/docker:linux-amd64
-  settings:
-    auto_tag: true
-    auto_tag_suffix: linux-amd64
-    daemon_off: false
-    dockerfile: docker/Dockerfile.linux.amd64
-    force_push: true
-    password:
-      from_secret: docker_password
-    repo: plugins/gh-pages
-    username:
-      from_secret: docker_username
-  when:
-    event:
-      exclude:
-      - pull_request
-
-
 trigger:
   ref:
   - refs/heads/master
