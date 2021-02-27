@@ -78,7 +78,7 @@ func main() {
 			Usage:  "git clone path",
 			EnvVar: "PLUGIN_WORKSPACE,DRONE_WORKSPACE",
 		},
-		cli.BoolTFlag{
+		cli.BoolFlag{
 			Name:   "force-push",
 			Usage:  "git force push",
 			EnvVar: "PLUGIN_FORCE_PUSH",
