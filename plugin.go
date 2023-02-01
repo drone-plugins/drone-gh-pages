@@ -26,7 +26,8 @@ type (
 	}
 
 	Commit struct {
-		Author Author
+		Author          Author
+		AppendToMessage string
 	}
 
 	Netrc struct {
@@ -240,6 +241,7 @@ func (p Plugin) dirtyRepo() bool {
 }
 
 func (p Plugin) commitMessage() ([]byte, error) {
+
 	cmd := exec.Command(
 		"git",
 		"show",
@@ -247,7 +249,13 @@ func (p Plugin) commitMessage() ([]byte, error) {
 	)
 
 	cmd.Dir = p.Build.Path
-	return cmd.Output()
+	output, err := cmd.Output()
+
+	if output != nil && len(output) != 0 && p.Commit.AppendToMessage != "" {
+		output = append(output, []byte(p.Commit.AppendToMessage)...)
+	}
+
+	return output, err
 }
 
 func trace(cmd *exec.Cmd) {

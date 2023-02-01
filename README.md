@@ -52,3 +52,5 @@ docker run --rm \
   -w $(pwd) \
   plugins/gh-pages
 ```
+
+`PLUGIN_COMMIT_APPEND_TO_MESSAGE` is also optional, if you want to append something to the commit message generated from the output of `git show -q`.

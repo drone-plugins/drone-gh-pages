@@ -99,6 +99,12 @@ func main() {
 			Usage:  "netrc password",
 			EnvVar: "PLUGIN_PASSWORD,DRONE_NETRC_PASSWORD,GH_PAGES_PASSWORD,GITHUB_PASSWORD",
 		},
+		cli.StringFlag{
+			Name:   "commit.append_to_message",
+			Usage:  "Something to append to the commit message",
+			EnvVar: "PLUGIN_COMMIT_APPEND_TO_MESSAGE, DRONE_COMMIT_APPEND_TO_MESSAGE",
+			Value:  "",
+		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
@@ -121,6 +127,7 @@ func run(c *cli.Context) error {
 				Name:  c.String("commit.author.name"),
 				Email: c.String("commit.author.email"),
 			},
+			AppendToMessage: c.String("commit.append_to_message"),
 		},
 
 		Netrc: Netrc{
