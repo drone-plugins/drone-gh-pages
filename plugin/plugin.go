@@ -230,6 +230,18 @@ func verifyArgs(args *Args) error {
 		}
 	}
 
+	if args.PagesCommit.Message == "" {
+		args.PagesCommit.Message = args.Commit.Message
+		if args.PagesCommit.Message == "" {
+			return fmt.Errorf("commit message not specified: %w", errConfiguration)
+		}
+	} else {
+		args.PagesCommit.Message, err = contents(args.PagesCommit.Message)
+		if err != nil {
+			return fmt.Errorf("commit message not specified: %w", errConfiguration)
+		}
+	}
+
 	// Rsync
 	if !filepath.IsAbs(args.PagesDirectory) {
 		wd, err := os.Getwd()
@@ -399,15 +411,10 @@ func stageChanges(args *Args) error {
 }
 
 func commitChanges(args *Args) error {
-	message, err := commitMessage(args)
-	if err != nil {
-		return err
-	}
-
 	commit := []string{
 		"commit",
 		"-m",
-		message,
+		args.PagesCommit.Message,
 	}
 
 	cmd := exec.Command(
@@ -455,22 +462,6 @@ func dirtyRepo(args *Args) bool {
 	}
 
 	return false
-}
-
-func commitMessage(args *Args) (string, error) {
-	cmd := exec.Command(
-		"git",
-		"show",
-		"-q",
-	)
-	cmd.Dir = args.PagesDirectory
-
-	output, err := cmd.Output()
-	if err != nil {
-		return "", fmt.Errorf("could not get commit message: %w", err)
-	}
-
-	return string(output), nil
 }
 
 func trace(cmd *exec.Cmd) {
