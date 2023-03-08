@@ -1,4 +1,4 @@
-FROM plugins/base:linux-arm64
+FROM alpine:3.17
 
 LABEL maintainer="Drone.IO Community <drone-dev@googlegroups.com>" \
   org.label-schema.name="Drone GitHub Pages" \
