@@ -1,163 +1,60 @@
+// Copyright (c) 2023, the Drone Plugins project authors.
+// Please see the AUTHORS file for details. All rights reserved.
+// Use of this source code is governed by an Apache 2.0 license that can be
+// found in the LICENSE file.
+
 package main
 
 import (
-	"log"
+	"context"
 	"os"
-	"path/filepath"
 
-	"github.com/urfave/cli"
-)
+	"github.com/drone-plugins/drone-gh-pages/plugin"
 
-var (
-	version = "unknown"
+	"github.com/kelseyhightower/envconfig"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
-	app := cli.NewApp()
-	app.Name = "gh-pages plugin"
-	app.Usage = "gh-pages plugin"
-	app.Action = run
-	app.Version = version
-	app.Flags = []cli.Flag{
-		cli.StringFlag{
-			Name:   "upstream-name",
-			Usage:  "git upstream to target",
-			EnvVar: "PLUGIN_UPSTREAM_NAME",
-			Value:  "origin",
-		},
-		cli.StringFlag{
-			Name:   "target-branch",
-			Usage:  "git branch to target",
-			EnvVar: "PLUGIN_TARGET_BRANCH",
-			Value:  "gh-pages",
-		},
-		cli.StringFlag{
-			Name:   "temporary-base",
-			Usage:  "temporary directory for pages pull",
-			EnvVar: "PLUGIN_TEMPORARY_BASE",
-			Value:  ".tmp",
-		},
-		cli.StringFlag{
-			Name:   "pages-directory",
-			Usage:  "directory of content to publish",
-			EnvVar: "PLUGIN_PAGES_DIRECTORY",
-			Value:  "docs",
-		},
-		cli.StringFlag{
-			Name:   "ssh-key",
-			Usage:  "private ssh key",
-			EnvVar: "PLUGIN_SSH_KEY,GIT_PUSH_SSH_KEY,SSH_KEY",
-		},
-		cli.BoolTFlag{
-			Name:   "exclude-cname",
-			Usage:  "exclude cname file from sync",
-			EnvVar: "PLUGIN_EXCLUDE_CNAME",
-		},
-		cli.BoolTFlag{
-			Name:   "delete",
-			Usage:  "delete files from destination",
-			EnvVar: "PLUGIN_DELETE",
-		},
-		cli.StringFlag{
-			Name:   "commit.author.name",
-			Usage:  "git author name",
-			EnvVar: "PLUGIN_USER_NAME,DRONE_COMMIT_AUTHOR",
-		},
-		cli.StringFlag{
-			Name:   "commit.author.email",
-			Usage:  "git author email",
-			EnvVar: "PLUGIN_USER_EMAIL,DRONE_COMMIT_AUTHOR_EMAIL",
-		},
-		cli.StringFlag{
-			Name:   "remote",
-			Usage:  "git remote url",
-			EnvVar: "PLUGIN_REMOTE_URL,DRONE_REMOTE_URL",
-		},
-		cli.StringFlag{
-			Name:   "path",
-			Usage:  "git clone path",
-			EnvVar: "PLUGIN_WORKSPACE,DRONE_WORKSPACE",
-		},
-		cli.BoolFlag{
-			Name:   "force-push",
-			Usage:  "git force push",
-			EnvVar: "PLUGIN_FORCE_PUSH",
-		},
-		cli.StringFlag{
-			Name:   "netrc.machine",
-			Usage:  "netrc machine",
-			EnvVar: "PLUGIN_NETRC_MACHINE,DRONE_NETRC_MACHINE",
-			Value:  "github.com",
-		},
-		cli.StringFlag{
-			Name:   "netrc.username",
-			Usage:  "netrc username",
-			EnvVar: "PLUGIN_USERNAME,DRONE_NETRC_USERNAME,GH_PAGES_USERNAME,GITHUB_USERNAME",
-		},
-		cli.StringFlag{
-			Name:   "netrc.password",
-			Usage:  "netrc password",
-			EnvVar: "PLUGIN_PASSWORD,DRONE_NETRC_PASSWORD,GH_PAGES_PASSWORD,GITHUB_PASSWORD",
-		},
+	// TODO: Remove when docker runner works on Windows
+	argCount := len(os.Args)
+	if argCount != 1 {
+		if argCount == 2 && os.Args[1] == "--help" {
+			os.Exit(0)
+		}
+
+		os.Exit(1)
 	}
 
-	if err := app.Run(os.Args); err != nil {
-		log.Fatal(err)
+	logrus.SetFormatter(new(formatter))
+
+	var args plugin.Args
+	if err := envconfig.Process("", &args); err != nil {
+		logrus.Fatalln(err)
+	}
+
+	switch args.Level {
+	case "debug":
+		logrus.SetFormatter(textFormatter)
+		logrus.SetLevel(logrus.DebugLevel)
+	case "trace":
+		logrus.SetFormatter(textFormatter)
+		logrus.SetLevel(logrus.TraceLevel)
+	}
+
+	if err := plugin.Exec(context.Background(), &args); err != nil {
+		logrus.Fatalln(err)
 	}
 }
 
-func run(c *cli.Context) error {
-	plugin := Plugin{
-		Repo: Repo{
-			Clone: c.String("remote"),
-		},
+// default formatter that writes logs without including timestamp or level information.
+type formatter struct{}
 
-		Build: Build{
-			Path: c.String("path"),
-		},
+func (*formatter) Format(entry *logrus.Entry) ([]byte, error) {
+	return []byte(entry.Message), nil
+}
 
-		Commit: Commit{
-			Author: Author{
-				Name:  c.String("commit.author.name"),
-				Email: c.String("commit.author.email"),
-			},
-		},
-
-		Netrc: Netrc{
-			Login:    c.String("netrc.username"),
-			Machine:  c.String("netrc.machine"),
-			Password: c.String("netrc.password"),
-		},
-		Config: Config{
-			Key:            c.String("ssh-key"),
-			UpstreamName:   c.String("upstream-name"),
-			TargetBranch:   c.String("target-branch"),
-			TemporaryBase:  c.String("temporary-base"),
-			PagesDirectory: c.String("pages-directory"),
-			ExcludeCname:   c.Bool("exclude-cname"),
-			Delete:         c.Bool("delete"),
-			ForcePush:      c.Bool("force-push"),
-		},
-	}
-
-	if !filepath.IsAbs(plugin.Config.TemporaryBase) {
-		plugin.Config.TemporaryBase = filepath.Join(
-			plugin.Build.Path,
-			plugin.Config.TemporaryBase,
-		)
-	}
-
-	if !filepath.IsAbs(plugin.Config.PagesDirectory) {
-		plugin.Config.PagesDirectory = filepath.Join(
-			plugin.Build.Path,
-			plugin.Config.PagesDirectory,
-		)
-	}
-
-	plugin.Config.WorkDirectory = filepath.Join(
-		plugin.Config.TemporaryBase,
-		filepath.Base(plugin.Config.PagesDirectory),
-	)
-
-	return plugin.Exec()
+// text formatter that writes logs with level information.
+var textFormatter = &logrus.TextFormatter{
+	DisableTimestamp: true,
 }
