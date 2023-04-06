@@ -312,24 +312,6 @@ func prepare(args *Args) error {
 		logrus.Infof("using ssh key for authentication\n")
 	}
 
-	if err := runCommand(repo.GlobalUser(args.PagesCommit.Author.Email)); err != nil {
-		return fmt.Errorf("failed to set email to %s: %w", args.PagesCommit.Author.Email, err)
-	}
-
-	if err := runCommand(repo.GlobalName(args.PagesCommit.Author.Name)); err != nil {
-		return fmt.Errorf("failed to set author to %s: %w", args.PagesCommit.Author.Name, err)
-	}
-
-	logrus.Infof("committing as: %s <%s>\n", args.PagesCommit.Author.Name, args.PagesCommit.Author.Email)
-
-	if args.SkipVerify {
-		if err := runCommand(repo.SkipVerify()); err != nil {
-			return fmt.Errorf("failed to disable ssl verification: %w", err)
-		}
-
-		logrus.Warningf("ssl verification is turned off")
-	}
-
 	return nil
 }
 
@@ -339,6 +321,16 @@ func process(args *Args) error {
 	if err := cloneTarget(args); err != nil {
 		return fmt.Errorf("failed to clone target: %w", err)
 	}
+
+	if err := gitCommitAuthor(args); err != nil {
+		return fmt.Errorf("failed to set author to %s: %w", args.PagesCommit.Author.Name, err)
+	}
+
+	if err := gitCommitEmail(args); err != nil {
+		return fmt.Errorf("failed to set email to %s: %w", args.PagesCommit.Author.Email, err)
+	}
+
+	logrus.Infof("committing as: %s <%s>\n", args.PagesCommit.Author.Name, args.PagesCommit.Author.Email)
 
 	if err := rsyncPages(args); err != nil {
 		return fmt.Errorf("failed to sync pages: %w", err)
@@ -366,6 +358,20 @@ func process(args *Args) error {
 func cloneTarget(args *Args) error {
 	clone := []string{
 		"clone",
+	}
+
+	if args.SkipVerify {
+		clone = append(
+			clone,
+			"--config",
+			"http.sslVerify=false",
+		)
+
+		logrus.Warningf("ssl verification is turned off")
+	}
+
+	clone = append(
+		clone,
 		"--branch",
 		args.PagesRepo.Branch,
 		"--origin",
@@ -373,7 +379,7 @@ func cloneTarget(args *Args) error {
 		"--single-branch",
 		args.PagesRepo.Remote,
 		args.PagesRepo.Checkout,
-	}
+	)
 
 	cmd := exec.Command(
 		"git",
@@ -433,6 +439,30 @@ func gitVersion(args *Args) error {
 	cmd := exec.Command(
 		"git",
 		"version",
+	)
+	cmd.Dir = args.PagesRepo.Checkout
+
+	return runCommand(cmd)
+}
+
+func gitCommitAuthor(args *Args) error {
+	cmd := exec.Command(
+		"git",
+		"config",
+		"user.name",
+		args.PagesCommit.Author.Name,
+	)
+	cmd.Dir = args.PagesRepo.Checkout
+
+	return runCommand(cmd)
+}
+
+func gitCommitEmail(args *Args) error {
+	cmd := exec.Command(
+		"git",
+		"config",
+		"user.email",
+		args.PagesCommit.Author.Email,
 	)
 	cmd.Dir = args.PagesRepo.Checkout
 
