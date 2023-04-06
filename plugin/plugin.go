@@ -90,6 +90,12 @@ func Exec(ctx context.Context, args *Args) error {
 		return fmt.Errorf("error in the configuration: %w", err)
 	}
 
+	// Verify git and rsync are present
+	err = verifyExes(args)
+	if err != nil {
+		return fmt.Errorf("error running executable: %w", err)
+	}
+
 	// Prepare git config
 	err = prepare(args)
 	if err != nil {
@@ -142,7 +148,7 @@ func lintArgs(args *Args) (issues int, warnings string) {
 	}
 
 	if args.Netrc.Machine != "" {
-		warningsBuilder.WriteString("remove netrc_machine from config is it deprectated\n")
+		warningsBuilder.WriteString("remove netrc_machine from config is it deprecated\n")
 		issues++
 	}
 
@@ -275,6 +281,20 @@ func verifyArgs(args *Args) error {
 	return nil
 }
 
+func verifyExes(args *Args) error {
+	err := gitVersion(args)
+	if err != nil {
+		fmt.Errorf("git not available: %w", err)
+	}
+
+	err = rsyncVersion(args)
+	if err != nil {
+		fmt.Errorf("rsync not available: %w", err)
+	}
+
+	return nil
+}
+
 func prepare(args *Args) error {
 	if args.Netrc.Login != "" && args.Netrc.Password != "" {
 		if err := repo.WriteNetrc(args.Netrc.Machine, args.Netrc.Login, args.Netrc.Password); err != nil {
@@ -292,18 +312,18 @@ func prepare(args *Args) error {
 		logrus.Infof("using ssh key for authentication\n")
 	}
 
-	if err := repo.GlobalUser(args.PagesCommit.Author.Email).Run(); err != nil {
-		return fmt.Errorf("failed to set email: %w", err)
+	if err := runCommand(repo.GlobalUser(args.PagesCommit.Author.Email)); err != nil {
+		return fmt.Errorf("failed to set email to %s: %w", args.PagesCommit.Author.Email, err)
 	}
 
-	if err := repo.GlobalName(args.PagesCommit.Author.Name).Run(); err != nil {
-		return fmt.Errorf("failed to set author: %w", err)
+	if err := runCommand(repo.GlobalName(args.PagesCommit.Author.Name)); err != nil {
+		return fmt.Errorf("failed to set author to %s: %w", args.PagesCommit.Author.Name, err)
 	}
 
 	logrus.Infof("committing as: %s <%s>\n", args.PagesCommit.Author.Name, args.PagesCommit.Author.Email)
 
 	if args.SkipVerify {
-		if err := repo.SkipVerify().Run(); err != nil {
+		if err := runCommand(repo.SkipVerify()); err != nil {
 			return fmt.Errorf("failed to disable ssl verification: %w", err)
 		}
 
@@ -363,6 +383,16 @@ func cloneTarget(args *Args) error {
 	return runCommand(cmd)
 }
 
+func rsyncVersion(args *Args) error {
+	cmd := exec.Command(
+		"rsync",
+		"--version",
+	)
+	cmd.Dir = args.PagesRepo.Checkout
+
+	return runCommand(cmd)
+}
+
 func rsyncPages(args *Args) error {
 	rysnc := []string{
 		"-r",
@@ -395,6 +425,16 @@ func rsyncPages(args *Args) error {
 		"rsync",
 		rysnc...,
 	)
+
+	return runCommand(cmd)
+}
+
+func gitVersion(args *Args) error {
+	cmd := exec.Command(
+		"git",
+		"version",
+	)
+	cmd.Dir = args.PagesRepo.Checkout
 
 	return runCommand(cmd)
 }
