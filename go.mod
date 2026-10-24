@@ -2,6 +2,8 @@ module github.com/drone-plugins/drone-gh-pages
 
 go 1.20
 
+toolchain go1.26.10
+
 require (
 	github.com/appleboy/drone-git-push v1.0.2
 	github.com/drone/drone-go v1.7.1
